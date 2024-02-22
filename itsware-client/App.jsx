@@ -26,10 +26,20 @@ const App = () => {
     try {
       setLoading(true);
       setError(null);
-      const client = await TcpSocket.createConnection({port: 40001});
-      const response = await client.readData();
-      client.destroy();
-
+      let response;
+      const client = TcpSocket.createConnection(options, () => {
+        client.write("Hello server!");
+        client.destroy();
+      });
+      client.on("data", function (data) {
+        response = data;
+      });
+      client.on("error", function (error) {
+        console.log(error);
+      });
+      client.on("close", function () {
+        console.log("Connection closed!");
+      });
       const devices = response.slice(response.indexOf(',') + 1, -1).split(',');
       setDeviceList(devices);
 
